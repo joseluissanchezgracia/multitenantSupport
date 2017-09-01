@@ -14,11 +14,12 @@ To use it, include a file with Spring context:
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-	<import resource="classpath:/spring/empiproject-${dbconnection.type:jdbc}-datasource.xml" />
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"
+		p:jndiName="${jndi.name}" />
 
 	<bean
 		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="staticMethod" value="com.everis.ehcos.multitenantsupport.MultitenantContextProvider.setMultitenantEnabled" />
+		<property name="staticMethod" value="com.multitenantsupport.MultitenantContextProvider.setMultitenantEnabled" />
 		<property name="arguments">
 			<list>
 				<value>${multitenancy.enabled}</value>
@@ -27,12 +28,12 @@ To use it, include a file with Spring context:
 	</bean>
 
 	<bean id="multitenantConfigurationEventFactory"
-		class="com.everis.ehcos.multitenantsupport.configuration.events.TenantConfigurationEventFactory"
+		class="com.multitenantsupport.configuration.events.TenantConfigurationEventFactory"
 		lazy-init="true">
 	</bean>
 
 	<bean id="etcdConfigurationProvider"
-		class="com.everis.ehcos.multitenantsupport.configuration.etcd.EtcdTenantConfigurationProvider"
+		class="com.multitenantsupport.configuration.etcd.EtcdTenantConfigurationProvider"
 		lazy-init="true">
 		<constructor-arg index="0" value="${etcd.server.url}" />
 		<constructor-arg index="1"
@@ -42,13 +43,13 @@ To use it, include a file with Spring context:
 	</bean>
 	
 	<bean id="multitenantConfigurationProvider"
-		class="com.everis.ehcos.multitenantsupport.configuration.TenantConfigurationProvider"
+		class="com.multitenantsupport.configuration.TenantConfigurationProvider"
 		lazy-init="true">
 		<property name="jsonConfigurationProvider" ref="etcdConfigurationProvider" />
 	</bean>
 
 	<bean id="dataSourceFactory"
-		class="com.everis.ehcos.multitenantsupport.datasource.BasicDbcpDataSourceFactory">
+		class="com.multitenantsupport.datasource.BasicDbcpDataSourceFactory">
 		<property name="defaultAutoCommit" value="false" />
 		<property name="maxActive" value="30" />
 		<property name="initialSize" value="5" />
@@ -59,19 +60,19 @@ To use it, include a file with Spring context:
 	</bean>
 
 	<bean id="dataSourceProvider"
-		class="com.everis.ehcos.multitenantsupport.datasource.DataSourceProvider">
+		class="com.multitenantsupport.datasource.DataSourceProvider">
 		<property name="defaultDataSourceRef" ref="dataSource" />
 		<property name="dataSourceFactory" ref="dataSourceFactory" />
 		<property name="tenantConfigurationProvider" ref="multitenantConfigurationProvider" />
 	</bean>
 
 	<bean id="dataSourceMultitenantConnectionProvider"
-		class="com.everis.ehcos.multitenantsupport.hibernate.DataSourceMultitenantConnectionProvider">
+		class="com.multitenantsupport.hibernate.DataSourceMultitenantConnectionProvider">
 		<property name="dataSourceProvider" ref="dataSourceProvider" />
 	</bean>
 
 	<bean id="dataSourceTenantIdentifierResolver"
-		class="com.everis.ehcos.multitenantsupport.hibernate.DataSourceCurrentTenantIdentifierResolver">
+		class="com.multitenantsupport.hibernate.DataSourceCurrentTenantIdentifierResolver">
 	</bean>
 
 </beans>
